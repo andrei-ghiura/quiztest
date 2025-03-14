@@ -1,0 +1,95 @@
+[{"question": "Care este capitala Franței?",
+"answer":["Paris" ,"Londra" ,"Berlin" ],
+"corect": "Paris",
+"answered": false,
+"Suma": "200",
+"Coloana": 1 
+},
+
+{"question": "Câte planete are sistemul nostru solar?",
+"answer":["7" ,"8" ,"9" ],
+"corect": "8",
+"answered": false,
+"Suma": "200",
+"Coloana": 2 
+},
+
+{"question": "Câte continente există?",
+"answer":["5" ,"6" ,"7" ],
+"corect": "7",
+"answered": false,
+"Suma": "400",
+"Coloana": 1 
+},
+
+{"question": "Care este cel mai lung fluviu din lume?",
+"answer":["Amazon" ,"Nil" ,"Yangtze" ],
+"corect": "Amazon",
+"answered": false,
+"Suma": "400",
+"Coloana": 2 
+},
+
+{"question": "Câte ore are o zi?",
+"answer":["12" ,"24" ,"36" ],
+"corect": "24",
+"answered": false,
+"Suma": "600",
+"Coloana": 1 
+},
+
+{"question": "Care este cel mai înalt munte din lume?",
+"answer":["K2" ,"Everest" ,"Kangchenjunga" ],
+"corect": "Everest",
+"answered": false,
+"Suma": "600",
+"Coloana": 2 
+},
+
+{"question": "Câte zile are anul bisect?",
+"answer":["365" ,"366" ,"364" ],
+"corect": "366",
+"answered": false,
+"Suma": "800",
+"Coloana": 1 
+},
+
+{"question": "Care este cel mai mare ocean din lume?",
+"answer":["Atlantic" ,"Indian" ,"Pacific" ],
+"corect": "Pacific",
+"answered": false,
+"Suma": "800",
+"Coloana": 2 
+},
+
+{"question": "Câte litere are alfabetul englez?",
+"answer":["24" ,"26" ,"28" ],
+"corect": "26",
+"answered": false,
+"Suma": "1000",
+"Coloana": 1 
+},
+
+{"question": "Care este cel mai rapid animal terestru?",
+"answer":["Ghepard" ,"Leu" ,"Antilopă" ],
+"corect": "Ghepard",
+"answered": false,
+"Suma": "1000",
+"Coloana": 2 
+},
+
+{"question": "Câte laturi are un hexagon?",
+"answer":["5" ,"6" ,"7" ],
+"corect": "6",
+"answered": false,
+"Suma": "1200",
+"Coloana": 1 
+},
+
+{"question": "Care este cel mai mare mamifer din lume?",
+"answer":["Elefant" ,"Balena albastră" ,"Girafă" ],
+"corect": "Balena albastră",
+"answered": false,
+"Suma": "1200",
+"Coloana": 2 
+}]
