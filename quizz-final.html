@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Interactiv</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #29153f, #2575fc);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #quiz-container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #quiz-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        #quiz-table th, #quiz-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        #quiz-table th {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        #quiz-table td {
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+
+        #quiz-table td.edited {
+            background-color: #e0e0e0;
+        }
+
+        #question-display {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e2e2e2;
+            border-radius: 5px;
+        }
+
+        .blocked {
+            pointer-events: none;
+        }
+
+        #fullscreen-btn {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #scores {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        #team-scores {
+            columns: 2;
+            column-gap: 40px;
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #team-scores li {
+            margin: 5px 0;
+        }
+
+        :fullscreen #quiz-container {
+            width: 95%;
+            max-width: none;
+            margin: 20px auto;
+        }
+
+        :fullscreen #quiz-table {
+            width: 100%;
+            font-size: 1.1em;
+        }
+
+        :fullscreen #quiz-table th, :fullscreen #quiz-table td {
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div id="quiz-container">
+        <h1 id="quiz-title">Quiz Interactiv</h1>
+        <button id="fullscreen-btn">Fullscreen</button>
+        <label for="team-select">Alege echipa:</label>
+        <select id="team-select"></select>
+        <input type="file" id="word-file" accept=".docx" />
+        <button onclick="loadQuestionsFromWord()">Încarcă întrebări din Word</button>
+        <table id="quiz-table">
+            <thead>
+                <tr>
+                    <th contenteditable="true">Coloana 1</th>
+                    <th contenteditable="true">Coloana 2</th>
+                    <th contenteditable="true">Coloana 3</th>
+                    <th contenteditable="true">Coloana 4</th>
+                    <th contenteditable="true">Coloana 5</th>
+                    <th contenteditable="true">Coloana 6</th>
+                    <th contenteditable="true">Coloana 7</th>
+                    <th contenteditable="true">Coloana 8</th>
+                    <th contenteditable="true">Coloana 9</th>
+                    <th contenteditable="true">Bonus 1</th>
+                    <th contenteditable="true">Bonus 2</th>
+                    <th contenteditable="true">Bonus 3</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <div id="question-display"></div>
+        <button onclick="resetQuestions()">Resetează întrebările</button>
+        <div id="scores">
+            <h2>Scoruri echipe</h2>
+            <ul id="team-scores"></ul>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let quizData = JSON.parse(localStorage.getItem('quizData')) || [];
+            const teams = ["Echipa 1", "Echipa 2", "Echipa 3", "Echipa 4", "Echipa 5", "Echipa 6", "Echipa 7", "Echipa 8", "Echipa 9"];
+            const teamColors = ["red", "blue", "green", "purple", "orange", "pink", "brown", "cyan", "yellow"];
+            let scores = JSON.parse(localStorage.getItem('scores')) || Array(teams.length).fill(0);
+            let currentTeamIndex = 0;
+            const tableBody = document.querySelector('#quiz-table tbody');
+            const questionDisplay = document.getElementById('question-display');
+            const teamSelect = document.getElementById('team-select');
+            const teamScores = document.getElementById('team-scores');
+            const points = [200, 400, 600, 800, 1000]; // Puncte pentru coloanele principale
+            const bonusPoints = [500, 1000, 2000]; // Puncte pentru coloanele bonus
+
+            // Buton Fullscreen
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                    fullscreenBtn.textContent = 'Ieși din Fullscreen';
+                } else {
+                    document.exitFullscreen();
+                    fullscreenBtn.textContent = 'Fullscreen';
+                }
+            }
+
+            // Previne ieșirea din fullscreen la click pe elemente interactive
+            document.addEventListener('click', function(event) {
+                if (document.fullscreenElement) {
+                    event.preventDefault();
+                }
+            }, true);
+
+            // Reintră automat în fullscreen dacă browserul iese
+            document.addEventListener('fullscreenchange', () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                }
+            });
+
+            teams.forEach((team, index) => {
+                let option = document.createElement('option');
+                option.value = index;
+                option.textContent = team;
+                teamSelect.appendChild(option);
+            });
+
+            function generateTable() {
+                tableBody.innerHTML = '';
+                points.forEach((point, rowIndex) => {
+                    const row = document.createElement('tr');
+                    for (let col = 0; col < 12; col++) { // 9 coloane principale + 3 bonus
+                        const cell = document.createElement('td');
+                        if (col < 9) {
+                            cell.textContent = point; // Coloane principale
+                        } else {
+                            cell.textContent = bonusPoints[rowIndex]; // Coloane bonus
+                        }
+                        cell.dataset.row = rowIndex;
+                        cell.dataset.col = col;
+                        cell.addEventListener('click', function() {
+                            displayQuestion(rowIndex, col, cell);
+                        });
+                        const questionIndex = rowIndex * 12 + col; // 12 coloane în total
+                        if (quizData[questionIndex]) {
+                            cell.classList.add('edited');
+                            if (quizData[questionIndex].answered) {
+                                cell.style.backgroundColor = teamColors[quizData[questionIndex].teamIndex];
+                                cell.classList.add('blocked');
+                            }
+                        }
+                        row.appendChild(cell);
+                    }
+                    tableBody.appendChild(row);
+                });
+            }
+
+            function displayQuestion(rowIndex, colIndex, cell) {
+                const questionIndex = rowIndex * 12 + colIndex;
+                let questionData = quizData[questionIndex];
+                if (!questionData) {
+                    const newQuestion = prompt("Introduceți întrebarea:");
+                    const answers = [];
+                    for (let i = 0; i < 3; i++) {
+                        answers.push(prompt(`Răspuns ${i + 1}:`));
+                    }
+                    const correctAnswer = prompt("Introduceți răspunsul corect:");
+                    quizData[questionIndex] = { question: newQuestion, answers, correct: correctAnswer, answered: false };
+                    localStorage.setItem('quizData', JSON.stringify(quizData));
+                    questionData = quizData[questionIndex];
+                    cell.classList.add('edited');
+                }
+                if (!questionData.answered) {
+                    questionDisplay.innerHTML = `
+                        <p>${questionData.question}</p>
+                        ${questionData.answers.map(answer => `
+                            <button onclick="checkAnswer('${answer}', ${questionIndex}, ${rowIndex}, ${colIndex})">${answer}</button>
+                        `).join('')}
+                    `;
+                }
+            }
+
+            window.checkAnswer = function(answer, index, rowIndex, colIndex) {
+                const questionData = quizData[index];
+                const cell = document.querySelector(`td[data-row='${rowIndex}'][data-col='${colIndex}']`);
+                currentTeamIndex = teamSelect.value;
+                const pointsToAdd = colIndex < 9 ? points[rowIndex] : bonusPoints[rowIndex]; // Verificăm dacă este o coloană bonus
+                if (answer === questionData.correct) {
+                    alert(`${teams[currentTeamIndex]} a răspuns corect! +${pointsToAdd} puncte`);
+                    scores[currentTeamIndex] += pointsToAdd;
+                } else {
+                    alert(`${teams[currentTeamIndex]} a răspuns greșit! -${pointsToAdd} puncte`);
+                    scores[currentTeamIndex] -= pointsToAdd;
+                }
+                questionData.answered = true;
+                questionData.teamIndex = currentTeamIndex;
+                cell.classList.add('blocked');
+                cell.style.backgroundColor = teamColors[currentTeamIndex];
+                localStorage.setItem('quizData', JSON.stringify(quizData));
+                localStorage.setItem('scores', JSON.stringify(scores));
+                updateScores();
+                questionDisplay.innerHTML = '';
+            };
+
+            function updateScores() {
+                teamScores.innerHTML = '';
+                const sortedScores = teams.map((team, index) => ({ team, score: scores[index] }))
+                    .sort((a, b) => b.score - a.score);
+                sortedScores.forEach((item, index) => {
+                    let li = document.createElement('li');
+                    li.textContent = `${index + 1}. ${item.team}: ${item.score} puncte`;
+                    teamScores.appendChild(li);
+                });
+            }
+
+            window.resetQuestions = function() {
+                localStorage.removeItem('quizData');
+                localStorage.removeItem('scores');
+                location.reload();
+            }
+
+            generateTable();
+            updateScores();
+        });
+    </script>
+    <!-- Include Mammoth.js pentru citirea documentelor Word -->
+    <script src="https://unpkg.com/mammoth@1.4.8/mammoth.browser.min.js"></script>
+</body>
+</html>
